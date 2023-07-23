@@ -11,15 +11,15 @@ fn main() {
     let mut game = rps::Game::new();
 
     for round in &mut choice_reader {
-        let (opponent_choice, player_choice) = match round {
-            Ok((opponent_choice, player_choice)) => (opponent_choice, player_choice),
+        let (opponent_choice, desired_outcome) = match round {
+            Ok((opponent_choice, desired_outcome)) => (opponent_choice, desired_outcome),
             Err(e) => panic!("{}", e),
         };
 
-        println!("{player_choice:?}, {opponent_choice:?}");
+        let player_choice = opponent_choice.fix_game(desired_outcome);
 
+        println!("{desired_outcome:?}, {player_choice:?}, {opponent_choice:?}");
         game.play_round(player_choice, opponent_choice);
-        println!("")
     }
 
     println!("player: {}, opponent: {}, rounds: {}", game.p1_score, game.p2_score, choice_reader.rounds_read)

@@ -7,6 +7,7 @@ const LOSE_POINTS: i32 = 0;
 const TIE_POINTS: i32 = 3;
 
 use Choice::*;
+use Outcome::*;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Choice {
@@ -31,11 +32,27 @@ impl Choice {
         }
     }
 
-    fn beats(self: &Choice) -> Choice {
+    pub fn beats(self: Choice) -> Choice {
         match self {
             Rock => Scissors,
             Paper => Rock,
             Scissors => Paper,
+        }
+    }
+
+    pub fn loses_to(self: Choice) -> Choice {
+        match self {
+            Rock => Paper,
+            Paper => Scissors,
+            Scissors => Rock
+        }
+    }
+
+    pub fn fix_game(self: Choice, outcome: Outcome) -> Choice {
+        match outcome {
+            Win => self.loses_to(),
+            Lose => self.beats(),
+            Tie => self
         }
     }
 }
@@ -60,19 +77,16 @@ impl Game {
 
         match (p1_choice, p2_choice) {
             (p1_choice, p2_choice) if p1_choice.beats() == p2_choice => {
-                println!("win");
                 // player 1 wins
                 self.p1_score += WIN_POINTS;
                 self.p2_score += LOSE_POINTS;
             }
             (p1_choice, p2_choice) if p2_choice.beats() == p1_choice => {
-                println!("lose");
                 // player 2 wins
                 self.p1_score += LOSE_POINTS;
                 self.p2_score += WIN_POINTS;
             }
             (p1_choice, p2_choice) if p1_choice == p2_choice => {
-                println!("tie");
                 // tie
                 self.p1_score += TIE_POINTS;
                 self.p2_score += TIE_POINTS;
