@@ -6,7 +6,8 @@ use crate::rps::Choice;
 
 pub struct ChoiceReader {
     reader: io::BufReader<File>,
-    line_buffer: String
+    line_buffer: String,
+    pub rounds_read: u32
 }
 
 impl ChoiceReader {
@@ -15,6 +16,7 @@ impl ChoiceReader {
             Ok(f) => Ok(ChoiceReader {
                 reader: io::BufReader::new(f),
                 line_buffer: String::new(),
+                rounds_read: 0
             }),
             Err(e) => Err(e),
         }
@@ -29,30 +31,33 @@ impl Iterator for ChoiceReader {
 
         let line = match self.reader.read_line(&mut self.line_buffer) {
             Ok(0) => return None, // end of file
-            Ok(_) => self.line_buffer.trim_end(),
-            Err(e) => return Some(Err(Box::new(e)))
+            Ok(_) => self.line_buffer.trim(),
+            Err(e) => return Some(Err(Box::new(e))),
         };
 
         if line.len() != 3 {
-            return Some(Err(format!("line \"{line}\" not 3 chars").into()))
+            return Some(Err(format!("line \"{line}\" not 3 chars").into()));
         }
 
-        let (player_choice, opponent_choice) = line.split_at(1); // split on middle space
 
-        let player_choice = match player_choice {
-            "A" => Choice::Rock,
-            "B" => Choice::Paper,
-            "C" => Choice::Scissors,
-            c => return Some(Err(format!("Unrecognized player choice: {c}").into()))
-        };
+        let (opponent_choice, player_choice) = line.split_at(1); // split on middle space
 
-        let opponent_choice = match opponent_choice {
+        let player_choice = match player_choice.trim() {
             "X" => Choice::Rock,
             "Y" => Choice::Paper,
             "Z" => Choice::Scissors,
-            c => return Some(Err(format!("Unrecognized opponent choice: {c}").into()))
+            c => return Some(Err(format!("Unrecognized player choice: {c}").into())),
         };
 
-        Some(Ok((player_choice, opponent_choice)))
+        let opponent_choice = match opponent_choice.trim() {
+            "A" => Choice::Rock,
+            "B" => Choice::Paper,
+            "C" => Choice::Scissors,
+            c => return Some(Err(format!("Unrecognized opponent choice: {c}").into())),
+        };
+
+        self.rounds_read += 1;
+
+        Some(Ok((opponent_choice, player_choice)))
     }
 }

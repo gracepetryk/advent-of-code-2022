@@ -8,7 +8,7 @@ const TIE_POINTS: i32 = 3;
 
 use Choice::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Choice {
     Rock,
     Paper,
@@ -28,7 +28,7 @@ impl Choice {
         match self {
             Rock => Scissors,
             Paper => Rock,
-            Scissors => Scissors,
+            Scissors => Paper,
         }
     }
 }
@@ -53,21 +53,24 @@ impl Game {
 
         match (p1_choice, p2_choice) {
             (p1_choice, p2_choice) if p1_choice.beats() == p2_choice => {
+                println!("win");
                 // player 1 wins
                 self.p1_score += WIN_POINTS;
                 self.p2_score += LOSE_POINTS;
-            },
+            }
             (p1_choice, p2_choice) if p2_choice.beats() == p1_choice => {
+                println!("lose");
                 // player 2 wins
                 self.p1_score += LOSE_POINTS;
                 self.p2_score += WIN_POINTS;
             }
             (p1_choice, p2_choice) if p1_choice == p2_choice => {
+                println!("tie");
                 // tie
                 self.p1_score += TIE_POINTS;
                 self.p2_score += TIE_POINTS;
             }
-            (_, _) => panic!("Could not determine round outcome")
+            (p1_choice, p2_choice) => panic!("Could not determine round outcome: {p1_choice:?}, {p2_choice:?}"),
         }
     }
 }
