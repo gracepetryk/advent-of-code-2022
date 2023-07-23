@@ -15,6 +15,13 @@ pub enum Choice {
     Scissors,
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum Outcome {
+    Win,
+    Lose,
+    Tie,
+}
+
 impl Choice {
     fn score(self: &Choice) -> i32 {
         match self {

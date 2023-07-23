@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{self, prelude::*};
 
-use crate::rps::Choice;
+use crate::rps::{Choice, Outcome};
 
 pub struct ChoiceReader {
     reader: io::BufReader<File>,
@@ -24,9 +24,9 @@ impl ChoiceReader {
 }
 
 impl Iterator for ChoiceReader {
-    type Item = Result<(Choice, Choice), Box<dyn Error>>;
+    type Item = Result<(Choice, Outcome), Box<dyn Error>>;
 
-    fn next(&mut self) -> Option<Result<(Choice, Choice), Box<dyn Error>>> {
+    fn next(&mut self) -> Option<Result<(Choice, Outcome), Box<dyn Error>>> {
         self.line_buffer.clear();
 
         let line = match self.reader.read_line(&mut self.line_buffer) {
@@ -40,13 +40,13 @@ impl Iterator for ChoiceReader {
         }
 
 
-        let (opponent_choice, player_choice) = line.split_at(1); // split on middle space
+        let (opponent_choice, needed_outcome) = line.split_at(1); // split on middle space
 
-        let player_choice = match player_choice.trim() {
-            "X" => Choice::Rock,
-            "Y" => Choice::Paper,
-            "Z" => Choice::Scissors,
-            c => return Some(Err(format!("Unrecognized player choice: {c}").into())),
+        let needed_outcome = match needed_outcome.trim() {
+            "X" => Outcome::Lose,
+            "Y" => Outcome::Tie,
+            "Z" => Outcome::Win,
+            c => return Some(Err(format!("Unrecognized outcome: {c}").into())),
         };
 
         let opponent_choice = match opponent_choice.trim() {
@@ -58,6 +58,6 @@ impl Iterator for ChoiceReader {
 
         self.rounds_read += 1;
 
-        Some(Ok((opponent_choice, player_choice)))
+        Some(Ok((opponent_choice, needed_outcome)))
     }
 }
